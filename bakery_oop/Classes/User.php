@@ -24,37 +24,37 @@ class User extends Database {
     }
 
     public function login($email, $password) {
-      $email = $this->conn->real_escape_string($email);
-  
-      $sql = "SELECT * FROM users WHERE email = '$email'";
-      $result = $this->conn->query($sql);
-  
-      if ($result->num_rows == 1) {
-          $user = $result->fetch_assoc();
-          if (password_verify($password, $user['password'])) {
-              session_start();
-              $_SESSION['user_id'] = $user['id'];
-              $_SESSION['user_name'] = $user['name']; 
-              $_SESSION['user_email'] = $user['email']; // Make sure to set user_email in the session
-  
-              // --- ADMIN CHECK AND REDIRECT ---
-              if ($user['isAdmin'] == 1) {
-                  $_SESSION['admin'] = true;
-                  header("Location: ../views/admin/admin_dashboard.php");
-                  exit;
-              } else {
-                  $_SESSION['admin'] = false;
-                  header("Location: ../views/user/index.php");  // Correct redirect path
-                  exit;
-              }
-              // --- END ADMIN CHECK AND REDIRECT ---
-  
-          } else {
-              return "Invalid password.";
-          }
-      } else {
-          return "User not found.";
-      }
+        $email = $this->conn->real_escape_string($email);
+    
+        $sql = "SELECT * FROM users WHERE email = '$email'";
+        $result = $this->conn->query($sql);
+    
+        if ($result->num_rows == 1) {
+            $user = $result->fetch_assoc();
+            if (password_verify($password, $user['password'])) {
+                session_start();
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['user_name'] = $user['name']; 
+                $_SESSION['user_email'] = $user['email']; // Make sure to set user_email in the session
+    
+                // --- ADMIN CHECK AND REDIRECT ---
+                if ($user['isAdmin'] == 1) {
+                    $_SESSION['admin'] = true;
+                    header("Location: ../views/admin/admin_dashboard.php");
+                    exit;
+                } else {
+                    $_SESSION['admin'] = false;
+                    header("Location: ../views/user/index.php");  // Correct redirect path
+                    exit;
+                }
+                // --- END ADMIN CHECK AND REDIRECT ---
+    
+            } else {
+                return "Invalid password.";
+            }
+        } else {
+            return "Invalid email or password.";
+        }
     }
 
     public function getUserDetails($userId) {
