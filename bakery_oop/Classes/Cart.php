@@ -28,7 +28,7 @@ class Cart extends Database {
 
     public function getCartTotal() {
         $total = 0;
-        $cartItems = $this->getCartItems();
+        $cartItems = $->getCartItems();
 
         foreach ($cartItems as $item) {
             $total += $item['subtotal'];
@@ -38,6 +38,20 @@ class Cart extends Database {
 
     public function updateCartItemQuantity($productId, $newQuantity) {
         if (isset($_SESSION['cart'][$productId])) {
+            $product = new Product();
+            $productData = $product->getProduct($productId);
+
+            if (!$productData) {
+                return ["error" => "Product not found."];
+            }
+
+            $currentQuantityInCart = $_SESSION['cart'][$productId];
+            $totalQuantity = $currentQuantityInCart + $newQuantity;
+
+            if ($totalQuantity > $productData['quantity']) {
+                return ["error" => "Not enough stock available. Only {$productData['quantity']} left."];
+            }
+
             if ($newQuantity > 0) {
                 $_SESSION['cart'][$productId] = $newQuantity;
                 return true; // Quantity updated successfully
@@ -57,7 +71,6 @@ class Cart extends Database {
         return false; // Item not found in cart
     }
 
-
     public function addToCart($productId, $quantity) {
         // Sanitize input
         $productId = (int)$productId;
@@ -72,12 +85,15 @@ class Cart extends Database {
         }
 
         // Check if there is enough stock
-        if ($quantity > $productData['quantity']) {
+        $currentQuantityInCart = isset($_SESSION['cart'][$productId]) ? $_SESSION['cart'][$productId] : 0;
+        $totalQuantity = $currentQuantityInCart + $quantity;
+
+        if ($totalQuantity > $productData['quantity']) {
             return ["error" => "Not enough stock available. Only {$productData['quantity']} left."];
-        } 
-        
-        if ($quantity <= 0 ) {
-          return ["error" => "Invalid quantity."];
+        }
+
+        if ($quantity <= 0) {
+            return ["error" => "Invalid quantity."];
         }
 
         if (isset($_SESSION['cart'][$productId])) {
